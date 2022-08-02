@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/fsnotify/fsnotify"
@@ -13,18 +14,20 @@ const (
 	aws_secret_access_key = "aws_secret_access_key"
 	debug                 = "debug"
 	aws_region            = "aws_region"
+	jq_key                = "jq"
 )
 
 func Init() {
 	viper.SetDefault("port", 8080)
+	viper.SetDefault("debug", false)
+	viper.SetDefault(aws_region, "us-west-2")
 
 	viper.SetConfigName("config")
 	viper.SetConfigType("toml")
 	viper.AddConfigPath(".")
 	viper.AddConfigPath("/etc/cloudfront-validator")
 	viper.AddConfigPath("$HOME/.config/cloudfront-validator")
-	viper.SetDefault("debug", false)
-	viper.SetDefault(aws_region, "us-west-2")
+	viper.ReadInConfig()
 
 	viper.AutomaticEnv()
 
@@ -37,7 +40,6 @@ func Init() {
 		log.Println("Config file changed:", e.Name)
 	})
 	viper.WatchConfig()
-	return
 }
 
 func IsDebug() bool {
@@ -54,4 +56,10 @@ func AwsKeySec() string {
 
 func AwsRegion() string {
 	return viper.GetString(aws_region)
+}
+
+func GetJqs(key string) []string {
+	k := fmt.Sprintf("%s.%s", jq_key, key)
+	jqs := viper.GetStringSlice(k)
+	return jqs
 }

@@ -56,7 +56,8 @@ func collectUrlsFromBody(c *gin.Context) (urls []string) {
 	if !ok || len(jqQuerysB64) == 0 {
 		return
 	}
-	jqQuerys := []string{}
+	var jqQuerys []string
+	jqQuerys, jqQuerysB64 = jqsFromConfig(jqQuerysB64)
 	jqQuerys = decodeB64AndAddString(jqQuerys, jqQuerysB64...)
 	jqQuerys = utils.Unique(jqQuerys)
 	if len(jqQuerys) == 0 {
@@ -92,6 +93,18 @@ func collectUrlsFromBody(c *gin.Context) (urls []string) {
 				urls = append(urls, strings.TrimSpace(u))
 				continue
 			}
+		}
+	}
+	return
+}
+
+func jqsFromConfig(jqB64 []string) (jqs []string, jqB64Out []string) {
+	for _, j := range jqB64 {
+		js := config.GetJqs(j)
+		if len(js) > 0 {
+			jqs = append(jqs, js...)
+		} else {
+			jqB64Out = append(jqB64Out, j)
 		}
 	}
 	return
