@@ -10,9 +10,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/itchyny/gojq"
-	"github.com/mpvl/unique"
 	"github.com/songchenwen/cloudfront-invalidator/cf"
 	"github.com/songchenwen/cloudfront-invalidator/config"
+	"github.com/songchenwen/cloudfront-invalidator/utils"
 )
 
 const (
@@ -44,7 +44,7 @@ func collectUrls(c *gin.Context) (urls []string) {
 	}
 
 	urls = append(urls, collectUrlsFromBody(c)...)
-	unique.Strings(&urls)
+	urls = utils.Unique(urls)
 	return
 }
 
@@ -58,7 +58,7 @@ func collectUrlsFromBody(c *gin.Context) (urls []string) {
 	}
 	jqQuerys := []string{}
 	jqQuerys = decodeB64AndAddString(jqQuerys, jqQuerysB64...)
-	unique.Strings(&jqQuerys)
+	jqQuerys = utils.Unique(jqQuerys)
 	if len(jqQuerys) == 0 {
 		return
 	}

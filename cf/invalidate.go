@@ -11,8 +11,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/cloudfront"
 	"github.com/aws/aws-sdk-go-v2/service/cloudfront/types"
 	"github.com/google/uuid"
-	"github.com/mpvl/unique"
 	"github.com/songchenwen/cloudfront-invalidator/config"
+	"github.com/songchenwen/cloudfront-invalidator/utils"
 )
 
 const (
@@ -27,7 +27,7 @@ func Invalidate(distribution string, urls []string, crawl bool) (id string, err 
 	}
 
 	paths := urls2paths(urls)
-	unique.Strings(&paths)
+	paths = utils.Unique(paths)
 	quantity := int32(len(paths))
 	reference := uuid.New().String()
 	req := &cloudfront.CreateInvalidationInput{
