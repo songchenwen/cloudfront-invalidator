@@ -4,15 +4,23 @@ import (
 	"context"
 	"net/url"
 	"path/filepath"
+	"time"
 
+	"github.com/ReneKroon/ttlcache"
 	awsconfig "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/cloudfront"
 	"github.com/songchenwen/cloudfront-invalidator/config"
 )
 
+const (
+	cacheTTL = time.Minute * 5
+)
+
 var client *cloudfront.Client
 var waiter *cloudfront.InvalidationCompletedWaiter
+
+var invalidationCache = ttlcache.NewCache()
 
 func Init() (err error) {
 	c, err := awsconfig.LoadDefaultConfig(context.Background(),
@@ -24,6 +32,7 @@ func Init() (err error) {
 	}
 	client = cloudfront.NewFromConfig(c)
 	waiter = cloudfront.NewInvalidationCompletedWaiter(client)
+	invalidationCache.SetTTL(cacheTTL)
 	return
 }
 

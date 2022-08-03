@@ -28,7 +28,12 @@ func Invalidate(distribution string, urls []string, crawl bool) (id string, err 
 
 	paths := urls2paths(urls)
 	paths = utils.Unique(paths)
+	paths = checkPathsWithCache(distribution, paths)
 	quantity := int32(len(paths))
+	if quantity == 0 {
+		return "No Need To Invalidate", nil
+	}
+	addPathToCache(distribution, paths)
 	reference := uuid.New().String()
 	req := &cloudfront.CreateInvalidationInput{
 		DistributionId: &distribution,
@@ -61,6 +66,7 @@ func Invalidate(distribution string, urls []string, crawl bool) (id string, err 
 			return
 		}
 		log.Printf("invalidate complete %s in %v, %v", id, duration, paths)
+		removePathFromCache(distribution, paths)
 		if crawl {
 			crawlUrls(urls)
 		}
